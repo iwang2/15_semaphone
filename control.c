@@ -36,18 +36,13 @@ int main (int argc, char * argv[]){
       char * s;
 
       struct stat st;
-      stat("story.txt", 
-      /*
-      printf("viewing semaphore...\n");
-      sd = semget(KEY, 1, 0);
-      sv = semctl(sd, 0, GETVAL);
-      
-      if (sv == -1) {
-	printf("error viewing semaphore: %s\n\n", strerror(errno));
-      } else {
-	printf("sem value: %d\n\n", sv);
-      }
-      */
+      stat("story.txt", &st);
+      int size = (int)st.st_size;
+
+      read(fd, s, size);
+      printf("%s\n", s);
+
+      close(fd);
     }
 
     if (!strcmp(argv[i], "-r")) {

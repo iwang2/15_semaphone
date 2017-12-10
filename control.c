@@ -12,10 +12,9 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 
-#define KEY ftok("control.c", 1)
+#define KEY 23318
 
 int main (int argc, char * argv[]){
-
   int
     fd /*file descriptor*/,
     sd /*semaphore descriptor*/,
@@ -27,12 +26,15 @@ int main (int argc, char * argv[]){
 
     // CREATION
     if (!strcmp(argv[i], "-c")) {
-
       sd = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0600);
       if (sd == -1) {
 	printf("semaphore already exists\n");
       } else {
-	smd = shmget(KEY, 1024, IPC_CREAT);
+	// GO BACK TO REPLACE WITH UNION
+	semctl(sd, 0, SETVAL, 1); //setting sem value to 1
+	smd = shmget(KEY, sizeof(int), IPC_CREAT);
+	int * size = shmat(smd, 0, 0);
+	* size = 0;
 	fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
       }
       close(fd);
@@ -54,8 +56,7 @@ int main (int argc, char * argv[]){
     }
 
     // REMOVAL
-    if (!strcmp(argv[i], "-r")) {
-      
+    if (!strcmp(argv[i], "-r")) {      
       //read file into buff
       fd = open("story.txt", O_RDONLY);
       char * buff;
@@ -78,7 +79,7 @@ int main (int argc, char * argv[]){
       }
 
       //remove shared memory
-      smd = shmget(KEY, 1024, 0);
+      smd = shmget(KEY, sizeof(int), 0);
       int smr = shmctl(smd, IPC_RMID, 0);
       if(smr == -1){
 	printf("error removing shared memory: %s\n", strerror(errno));

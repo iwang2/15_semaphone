@@ -41,17 +41,23 @@ int main (int argc, char * argv[]){
 
     // VIEWING STORY
     if (!strcmp(argv[i], "-v")) {
-      struct stat st;
-      stat("story.txt", &st);
-      int size = (int)st.st_size;
+      sd = semget(KEY, 1, 0600);
+      if(sd == -1){
+	printf("Semaphore has not been created yet!\n");
+      }
+      else{
+	struct stat st;
+	stat("story.txt", &st);
+	int size = (int)st.st_size;
       
-      fd = open("story.txt", O_RDONLY);
-      char * buff = malloc(size);
-      read(fd, buff, size);
-      close(fd);
+	fd = open("story.txt", O_RDONLY);
+	char * buff = malloc(size);
+	read(fd, buff, size);
+	close(fd);
 
-      printf("%s\n", buff);
-      free(buff);
+	printf("%s\n", buff);
+	free(buff);
+      }
     }
 
     // REMOVAL

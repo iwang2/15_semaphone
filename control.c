@@ -21,26 +21,21 @@ int main (int argc, char * argv[]){
     smd /*shared memory descriptor*/;
   
   for(i = 0; argv[i]; i++){
-    
-    if (!strcmp(argv[i], "-c")) {
-      //file stuff
-      fd = open("story.txt", O_TRUC | O_CREAT, 0644);
 
-      //semaphore stuff
+    // CREATION
+    if (!strcmp(argv[i], "-c")) {
+
       sd = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0600);
       if (sd == -1) {
-	printf("semaphore already exists\n\n");
+	printf("semaphore already exists\n");
       } else {
-	printf("semaphore created: %d\n", sd);
-	semctl(sd, 0, SETVAL, fd);
+	smd = shmget(KEY, 1024, IPC_CREAT);
+	fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
       }
-
-      //shared memory stuff
-      smd = shmget(KEY, 0, IPC_CREAT);
-      
       close(fd);
     }
 
+    // VIEWING STORY
     if (!strcmp(argv[i], "-v")) {
       fd = open("story.txt", O_RDONLY);
       char * buff;
@@ -56,16 +51,38 @@ int main (int argc, char * argv[]){
     }
 
     if (!strcmp(argv[i], "-r")) {
-      printf("removing semaphore...\n");
+      
+      //read file into buff
+      fd = open("story.txt", O_RDONLY);
+      char * buff;
+      
+      struct stat st;
+      stat("story.txt", &st);
+      int size = (int)st.st_size;
+      
+      read(fd, buff, size);
+      close(fd);
+      remove("story.txt");
+
+      //removing semaphore
       sd = semget(KEY, 1, 0);
       sv = semctl(sd, 0, IPC_RMID);
-
       if (sv == -1) {
 	printf("error removing semaphore: %s\n\n", strerror(errno));
       } else {
 	printf("semaphore removed: %d\n\n", sd);
       }
+
+      //remove shared memory
+      smd = shmget(KEY, 1024, 0);
+      int smr = shmctl(smd, IPC_RMID, 0);
+      if(smr == -1){
+	printf("error removing shared memory: %s\n", strerror(errno));
+      } else {
+	printf("shared memory removed\n");
+      }
+
+      printf("\nFINAL STORY:\n%s\n", buff);
     }
   }
-    
 }

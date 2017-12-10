@@ -3,8 +3,11 @@
 
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
@@ -50,6 +53,7 @@ int main (int argc, char * argv[]){
       close(fd);
     }
 
+    // REMOVAL
     if (!strcmp(argv[i], "-r")) {
       
       //read file into buff

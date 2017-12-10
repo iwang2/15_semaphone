@@ -32,6 +32,7 @@ int main (int argc, char * argv[]){
       }
       else {
 	fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
+	// FIGURE OUT UNION THING (keeps returning an error)
 	semctl(sd, 0, SETVAL, 1);	
 	smd = shmget(KEY, sizeof(int), IPC_CREAT);
 	close(fd);
@@ -40,22 +41,17 @@ int main (int argc, char * argv[]){
 
     // VIEWING STORY
     if (!strcmp(argv[i], "-v")) {
-
       struct stat st;
       stat("story.txt", &st);
       int size = (int)st.st_size;
-      printf("size of story.txt: %d\n", size);
-
+      
+      fd = open("story.txt", O_RDONLY);
       char * buff = malloc(size);
-      fd = open("story.txt", O_RDONLY | O_TRUNC);
-      int rr = read(fd, buff, size);      
-      if(rr == -1){
-	printf("error reading story.txt: %s\n", strerror(errno));
-      }else{
-	printf("%s\n", buff);
-      }
-      free(buff);
+      read(fd, buff, size);
       close(fd);
+
+      printf("%s\n", buff);
+      free(buff);
     }
 
     // REMOVAL

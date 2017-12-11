@@ -27,14 +27,15 @@ int main () {
     sd, //semaphore descriptor
     smd; //shared memory descriptor
   
-  sd = semget(KEY, 1, 0);
-  struct sembuf sb = {0, 0, SEM_UNDO};
+  sd = semget(KEY, 1, 0600);
+  struct sembuf sb = {-1, 0, SEM_UNDO};
   semop(sd, &sb, 1);
 
   smd = shmget(KEY, sizeof(int), 0644);
   int * size = shmat(smd, 0, 0);
-  
-  if(* size == 0){
+  printf("size: %d\n",size);
+  printf("size: %d\n",*size);
+  if(*size == 0){
     printf("You're starting with a clean slate!\n");
   }
 

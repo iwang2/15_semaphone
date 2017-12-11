@@ -28,12 +28,8 @@ int main () {
     smd; //shared memory descriptor
   
   sd = semget(KEY, 1, 0);
-  struct sembuf sb {
-    sem_op = 0;
-    sem_num = 0;
-    sem_flag = SEM_UNDO;
-  }
-  semop(sd, sb, 1);
+  struct sembuf sb = {0, 0, SEM_UNDO};
+  semop(sd, &sb, 1);
 
   smd = shmget(KEY, sizeof(int), 0644);
   int * size = shmat(smd, 0, 0);

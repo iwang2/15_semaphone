@@ -26,7 +26,8 @@ int main () {
     fd, //file descriptor
     sd, //semaphore descriptor
     smd; //shared memory descriptor
-  
+
+  // SEMAPHORE STUFF
   sd = semget(KEY, 1, 0);
   if(sd == -1){
     printf("error getting semaphore: %s\n", strerror(errno));
@@ -35,13 +36,16 @@ int main () {
   struct sembuf sb = {0, -1, SEM_UNDO};
   semop(sd, &sb, 1);
 
+  // GETTING LAST LINE
   smd = shmget(KEY, sizeof(int), 0);
   if(smd == -1){
     printf("error getting shared memory: %s\n", strerror(errno));
+    exit(0);
   }
   int * size = shmat(smd, 0, 0);
   if(*size == -1){
     printf("error attaching shared memory to variable: %s\n", strerror(errno));
+    exit(0);
   }
   else if(*size == 0){
     printf("You're starting with a clean slate!\n");
@@ -49,10 +53,21 @@ int main () {
   else {
     fd = open("story.txt", O_RDONLY);
     int pos = lseek(fd, *size * -1, SEEK_END);
-    char * buff;
+    char * buff = malloc(*size);
     read(fd, buff, *size);
     printf("previous line of the story:\n%s\n", buff);
     close(fd);
+    free(buff);
   }
-  
+  printf("Type the next line:\n");
+  char * input;
+  fgets(input, sizeof(char) * 2000, stdin);
+  fd = open("story.txt", O_WRONLY | O_APPEND);
+  write(fd, input, sizeof(input));
+  close(fd);
+
+  *size = sizeof(input);
+  shmdt(size);
+  sb.sem_op = 1;
+  semop(sd, &sb, 1);
 }

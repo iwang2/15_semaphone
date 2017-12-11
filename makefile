@@ -1,8 +1,8 @@
 all: write.c control.c
-	gcc -o write write.c
+	gcc -o client write.c
 	gcc -o control control.c
 
 clean:
-	rm write
-	rm control
-	rm story.txt
+	rm -rf client
+	rm -rf control
+	rm -rf story.txt

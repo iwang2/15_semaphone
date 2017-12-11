@@ -29,6 +29,7 @@ int main (int argc, char * argv[]){
       sd = semget(KEY, 1, IPC_CREAT | IPC_EXCL | 0600);
       if (sd == -1) {
 	printf("semaphore already exists\n");
+	return -1;
       }
       else {
 	// FIGURE OUT UNION THING (keeps returning an error)
@@ -36,11 +37,14 @@ int main (int argc, char * argv[]){
 	smd = shmget(KEY, sizeof(int), IPC_CREAT | 0644);
 	if (smd == -1) {
 	  printf("error creating shared memory: %s\n", strerror(errno));
+	  return -1;
 	}
 	else {
 	  //create story.txt
 	  fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
 	  close(fd);
+	  printf("Success! Semaphore has been created!\n");
+	  return 1;
 	}
       }
     }
@@ -50,6 +54,7 @@ int main (int argc, char * argv[]){
       sd = semget(KEY, 1, 0600);
       if(sd == -1){
 	printf("Semaphore has not been created yet!\n");
+	return -1;
       }
       else{
 	struct stat st;
@@ -61,8 +66,9 @@ int main (int argc, char * argv[]){
 	read(fd, buff, size);
 	close(fd);
 
-	printf("%s\n", buff);
+	printf("Here's the story:\n%s\n", buff);
 	free(buff);
+	return 1;
       }
     }
 
@@ -74,6 +80,7 @@ int main (int argc, char * argv[]){
       sv = semctl(sd, 0, IPC_RMID);
       if (sv == -1) {
 	printf("error removing semaphore: %s\n\n", strerror(errno));
+	return -1;
       } else {
 	printf("semaphore removed: %d\n\n", sd);
       }
@@ -83,6 +90,7 @@ int main (int argc, char * argv[]){
       int smr = shmctl(smd, IPC_RMID, 0);
       if(smr == -1){
 	printf("error removing shared memory: %s\n", strerror(errno));
+	return -1;
       } else {
 	printf("shared memory removed\n");
       }
@@ -100,6 +108,9 @@ int main (int argc, char * argv[]){
 
       printf("\nFINAL STORY:\n%s\n", buff);
       free(buff);
+      return 1;
     }
   }
+  printf("Not a valid command! Please try:\n\t-c: Create a semaphore\n\t-v: View the value of the semaphore\n\t-r: Remove the semaphore\n");
+  return -1;
 }

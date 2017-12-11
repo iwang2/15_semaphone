@@ -5,3 +5,4 @@ all: write.c control.c
 clean:
 	rm write
 	rm control
+	rm story.txt

@@ -31,16 +31,22 @@ int main (int argc, char * argv[]){
 	printf("semaphore already exists\n");
       }
       else {
-	fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
 	// FIGURE OUT UNION THING (keeps returning an error)
 	semctl(sd, 0, SETVAL, 1);	
-	smd = shmget(KEY, sizeof(int), IPC_CREAT);
-	close(fd);
+	smd = shmget(KEY, sizeof(int), IPC_CREAT | 0644);
+	if (smd == -1) {
+	  printf("error creating shared memory: %s\n", strerror(errno));
+	}
+	else {
+	  //create story.txt
+	  fd = open("story.txt", O_TRUNC | O_CREAT, 0644);
+	  close(fd);
+	}
       }
     }
 
     // VIEWING STORY
-    if (!strcmp(argv[i], "-v")) {
+    else if (!strcmp(argv[i], "-v")) {
       sd = semget(KEY, 1, 0600);
       if(sd == -1){
 	printf("Semaphore has not been created yet!\n");
@@ -61,7 +67,7 @@ int main (int argc, char * argv[]){
     }
 
     // REMOVAL
-    if (!strcmp(argv[i], "-r")) {
+    else if (!strcmp(argv[i], "-r")) {
 
       //removing semaphore
       sd = semget(KEY, 1, 0);

@@ -27,22 +27,25 @@ int main () {
     sd, //semaphore descriptor
     smd; //shared memory descriptor
   
-  sd = semget(KEY, 1, 0600);
-  struct sembuf sb = {-1, 0, SEM_UNDO};
+  sd = semget(KEY, 1, 0);
+  if(sd == -1){
+    printf("error getting semaphore: %s\n", strerror(errno));
+    exit(0);
+  }
+  struct sembuf sb = {0, -1, SEM_UNDO};
   semop(sd, &sb, 1);
 
-  smd = shmget(KEY, sizeof(int), 0644);
-  int * size = shmat(smd, 0, 0);
-  printf("size: %d\n",size);
-  printf("size: %d\n",*size);
-  if(*size == 0){
-    printf("You're starting with a clean slate!\n");
+  smd = shmget(KEY, sizeof(int), 0);
+  if(smd == -1){
+    printf("error getting shared memory: %s\n", strerror(errno));
   }
-
-  else if (*size == -1) {
+  int * size = shmat(smd, 0, 0);
+  if(*size == -1){
     printf("error attaching shared memory to variable: %s\n", strerror(errno));
   }
-
+  else if(*size == 0){
+    printf("You're starting with a clean slate!\n");
+  }
   else {
     fd = open("story.txt", O_RDONLY);
     int pos = lseek(fd, *size * -1, SEEK_END);

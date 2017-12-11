@@ -60,14 +60,16 @@ int main () {
     free(buff);
   }
   printf("Type the next line:\n");
-  char * input;
-  fgets(input, sizeof(char) * 2000, stdin);
+  char input[sizeof(char) * 2000];
+  fgets(input, sizeof(input), stdin);
   fd = open("story.txt", O_WRONLY | O_APPEND);
-  write(fd, input, sizeof(input));
-  close(fd);
+  printf("input: %s\n", input);
 
-  *size = sizeof(input);
+  *size = strlen(input);
+  write(fd, input, *size);
+  close(fd);
   shmdt(size);
+  
   sb.sem_op = 1;
   semop(sd, &sb, 1);
 }

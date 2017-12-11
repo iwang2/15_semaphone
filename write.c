@@ -63,7 +63,6 @@ int main () {
   char input[sizeof(char) * 2000];
   fgets(input, sizeof(input), stdin);
   fd = open("story.txt", O_WRONLY | O_APPEND);
-  printf("input: %s\n", input);
 
   *size = strlen(input);
   write(fd, input, *size);
